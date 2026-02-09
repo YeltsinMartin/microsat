@@ -131,25 +131,7 @@ Queues use **latest-value semantics** (`xQueueOverwrite`).
 ---
 
 ### Control Law
-
-\[
-\tau = -K_p (\theta_{est} - \theta_{ref})_{db} - K_d \omega
-\]
-
----
-
-### Deadband
-
-A small attitude deadband (default ≈ **0.5°**) prevents constant micro-corrections caused by noise.
-
----
-
-### Actuator Dynamics
-
-\[
-\omega_{rw}(k+1) =
-\omega_{rw}(k) + \frac{\tau}{J} \Delta t
-\]
+<img width="986" height="694" alt="image" src="https://github.com/YeltsinMartin/microsat/blob/main/controller.png" />
 
 ---
 
