@@ -158,8 +158,8 @@ A small attitude deadband (default ≈ **0.5°**) prevents constant micro-correc
 
 | Task | Rate |
 |---|---|
-| IO_MGR | 20 Hz |
-| AOCS_MGR | 10 Hz |
+| IO_MGR | 100 Hz |
+| AOCS_MGR | 100 Hz |
 | HealthMgr | 5 Hz |
 
 ---
