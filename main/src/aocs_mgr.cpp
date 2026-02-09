@@ -8,11 +8,19 @@ extern QueueHandle_t motor_bus;
 
 void AOCSMgr::init()
 {
-    theta_est   = 0.0f;
-    theta_ref   = 0.0f;
     wheel_speed = 0.0f;
+    gyro_bias   = 0.0f;
 }
 
+/* ---------------------------------------------------
+ * Rate damping reaction wheel controller
+ *
+ * gyro rate → damping torque
+ * torque → wheel acceleration
+ * acceleration integrated → wheel speed
+ *
+ * wheel keeps momentum when torque = 0
+ * --------------------------------------------------- */
 void AOCSMgr::step(float dt)
 {
     ImuData imu;
@@ -21,48 +29,55 @@ void AOCSMgr::step(float dt)
         return;
     }
 
-    /* ------------------------------------
-     * 1. Attitude estimation
-     * ------------------------------------ */
-    theta_est += imu.gz * dt;
+    /* -----------------------------
+     * 1. Gyro measurement
+     * ----------------------------- */
+    float gyro = imu.gy - gyro_bias;
 
-    /* ------------------------------------
-     * 2. Error with deadband
-     * ------------------------------------ */
-    float theta_err = theta_est - theta_ref;
-    float theta_eff = applyDeadband(theta_err);
+    /* Remove small sensor noise */
+    gyro = applyDeadband(gyro);
 
-    /* ------------------------------------
-     * 3. PD control law
-     * ------------------------------------ */
-    float torque =
-        -Kp * theta_eff
-        -Kd * imu.gz;
+    /* -----------------------------
+     * 2. Rate damping control
+     * τ = -Kd * ω
+     * ----------------------------- */
+    float torque = -Kd * gyro;
 
-    /* ------------------------------------
-     * 4. Torque → wheel speed
-     * ------------------------------------ */
-    wheel_speed += (torque / J) * dt;
+    /* -----------------------------
+     * 3. Torque → wheel acceleration
+     * ----------------------------- */
+    float accel = torque / J;
+
+    /* -----------------------------
+     * 4. Integrate to wheel speed
+     * ----------------------------- */
+    wheel_speed += accel * dt;
+
     wheel_speed = clamp(wheel_speed);
 
-    /* ------------------------------------
-     * 5. Publish command
-     * ------------------------------------ */
+    /* -----------------------------
+     * 5. Publish motor command
+     * ----------------------------- */
     MotorCmd cmd;
     cmd.wheel_speed = wheel_speed;
+
     xQueueOverwrite(motor_bus, &cmd);
 }
 
-float AOCSMgr::applyDeadband(float err)
+/* ---------------------------------------------------
+ * Ignore tiny gyro noise
+ * --------------------------------------------------- */
+float AOCSMgr::applyDeadband(float rate)
 {
-    if (fabsf(err) < THETA_DEADBAND) {
+    if (fabsf(rate) < RATE_DEADBAND)
         return 0.0f;
-    }
 
-    /* Soft deadband (no discontinuity) */
-    return err - copysignf(THETA_DEADBAND, err);
+    return rate;
 }
 
+/* ---------------------------------------------------
+ * Wheel speed safety limit
+ * --------------------------------------------------- */
 float AOCSMgr::clamp(float w)
 {
     if (w > 5000.0f)  return 5000.0f;

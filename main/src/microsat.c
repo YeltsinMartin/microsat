@@ -5,8 +5,6 @@
 
 void app_main(void)
 {
-    printf("Hello world!\n");
-    
     software_bus_init();
 
     xTaskCreate(io_task,     "IO_MGR",     2048, NULL, 3, NULL);

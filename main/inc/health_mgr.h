@@ -8,9 +8,10 @@ public:
     void init();
     void step(float dt);
 
-    bool faultActive() const;
+    bool faultActive();
 
 private:
+    u_int16_t  faultCounter ;
     float last_gyro = 0.0f;
     float timer = 0.0f;
 
@@ -18,10 +19,10 @@ private:
     bool gyro_roc    = false;
     bool motor_limit = false;
 
-    static constexpr float MAX_GYRO     = 5.0f;
-    static constexpr float MAX_GYRO_ROC = 10.0f;
+    static constexpr float MAX_GYRO     = 60.0f;
+    static constexpr float MAX_GYRO_ROC = 40.0f;
     static constexpr float MAX_MOTOR    = 5000.0f;
 
-    void checkGyro();
+    void checkGyro(float dt);
     void checkMotor();
 };

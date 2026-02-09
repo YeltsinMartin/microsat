@@ -16,9 +16,9 @@ void io_task(void *arg)
     TickType_t last = xTaskGetTickCount();
 
     while (1) {
-        printf("io_task\n");
-        io_mgr.step(0.05f);
-        vTaskDelayUntil(&last, pdMS_TO_TICKS(50));
+        //printf("io_task\n");
+        io_mgr.step(0.01f);
+        vTaskDelayUntil(&last, pdMS_TO_TICKS(10));
     }
 }
 
@@ -28,9 +28,9 @@ void aocs_task(void *arg)
     TickType_t last = xTaskGetTickCount();
 
     while (1) {
-        printf("io_task\n");
-        aocs_mgr.step(0.1f);
-        vTaskDelayUntil(&last, pdMS_TO_TICKS(100));
+        //printf("aocs_task\n");
+        aocs_mgr.step(0.01f);
+        vTaskDelayUntil(&last, pdMS_TO_TICKS(10));
     }
 }
 
@@ -40,11 +40,10 @@ void health_task(void *arg)
     TickType_t last = xTaskGetTickCount();
 
     while (1) {
-        printf("io_task\n");
+        //printf("health_task\n");
         health_mgr.step(0.2f);
 
         if (health_mgr.faultActive()) {
-            printf("HEALTH: Fault detected\n");
             /* No recovery here by design */
         }
 

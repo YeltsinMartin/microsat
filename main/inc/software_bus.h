@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 struct ImuData {
-    int16_t ax, ay, az, gx, gy, gz;
+    float ax, ay, az, gx, gy, gz;
 };
 
 struct MotorCmd {

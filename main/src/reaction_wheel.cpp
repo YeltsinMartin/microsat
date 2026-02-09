@@ -1,32 +1,51 @@
 #include "reaction_wheel.h"
-#include "driver/pwm.h"
 
-#define PWM_0_OUT_IO_NUM   1
+extern "C" {
+#include "driver/pwm.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_err.h"
+}
+
+#define PWM_ESC_OUT_IO_NUM   12
+#define PWM_PERIOD_US   20000
+#define ESC_MIN_US      1000
+#define ESC_MAX_US      2000
+
+static uint32_t duties[1] = {ESC_MIN_US};
+static uint32_t pins[1]   = {PWM_ESC_OUT_IO_NUM};
 
 void ReactionWheel::init()
 {
-    // pwm pin number
-    const uint32_t pin_num[1] = {
-        PWM_0_OUT_IO_NUM
-    };
-    uint32_t duty = 1000;
 
-    pwm_init(50, &duty, 1, pin_num);   // 50 Hz ESC
+    ESP_ERROR_CHECK(pwm_init(PWM_PERIOD_US, duties, 1, pins));
+
+    pwm_start();
+
+    vTaskDelay(pdMS_TO_TICKS(3000));
+
+    pwm_set_duty(0, ESC_MIN_US);
+    pwm_start();
+
+    vTaskDelay(pdMS_TO_TICKS(1000));
 }
 
 void ReactionWheel::step(float /*dt*/)
 {
     uint32_t duty = toPwm(command);
+
+    //printf("PWM : %d  Command :%d \n", duty, (int32_t)command);
     pwm_set_duty(0, duty);
     pwm_start();
 }
 
 uint32_t ReactionWheel::toPwm(float speed)
 {
-    uint32_t pwm = static_cast<uint32_t>(1500.0f + speed * 0.1f);
+    if (speed > 5000) speed = 5000;
+    if (speed < -5000) speed = -5000;
 
-    if (pwm < 1000) pwm = 1000;
-    if (pwm > 2000) pwm = 2000;
+    float pwm = 1200.0f +
+                (speed + 5000.0f) * 750.0f / 10000.0f;
 
-    return pwm;
+    return (uint32_t)pwm;
 }
