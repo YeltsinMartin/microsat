@@ -145,18 +145,3 @@ Queues use **latest-value semantics** (`xQueueOverwrite`).
 
 ---
 
-## File Structure
-
-```
-.
-├── app_main.cpp
-├── tasks.cpp / tasks.h
-├── software_bus.cpp / software_bus.h
-├── io_mgr.cpp / io_mgr.h
-├── imu.cpp / imu.h
-├── reaction_wheel.cpp / reaction_wheel.h
-├── aocs_mgr.cpp / aocs_mgr.h
-├── health_mgr.cpp / health_mgr.h
-└── README.md
-```
-
