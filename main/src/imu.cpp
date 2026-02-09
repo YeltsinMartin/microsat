@@ -11,7 +11,7 @@
 #include "driver/i2c.h"
 #include <cstring>
 
-static const char *TAG = "IMU";
+const char *TAG = "IMU";
 #define I2C_SCL_IO           2                /*!< gpio number for I2C master clock */
 #define I2C_SDA_IO           14               /*!< gpio number for I2C master data  */
 #define I2C_NUM              I2C_NUM_0        /*!< I2C port number for master dev */
@@ -53,7 +53,7 @@ static const char *TAG = "IMU";
 #define WHO_AM_I        0x75  /*!< Command to read WHO_AM_I reg */
 
 
-static esp_err_t i2c_init()
+esp_err_t i2c_init()
 {
     i2c_port_t i2c_master_port = I2C_NUM;
     i2c_config_t conf;
@@ -68,7 +68,7 @@ static esp_err_t i2c_init()
     return ESP_OK;
 }
 
-static esp_err_t mpu6050_read(i2c_port_t i2c_num, uint8_t reg_address, uint8_t *data, size_t data_len)
+esp_err_t mpu6050_read(i2c_port_t i2c_num, uint8_t reg_address, uint8_t *data, size_t data_len)
 {
     int ret;
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
@@ -94,7 +94,7 @@ static esp_err_t mpu6050_read(i2c_port_t i2c_num, uint8_t reg_address, uint8_t *
     return ret;
 }
 
-static esp_err_t mpu6050_write(i2c_port_t i2c_num, uint8_t reg_address, uint8_t *data, size_t data_len)
+esp_err_t mpu6050_write(i2c_port_t i2c_num, uint8_t reg_address, uint8_t *data, size_t data_len)
 {
     int ret;
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
@@ -109,7 +109,7 @@ static esp_err_t mpu6050_write(i2c_port_t i2c_num, uint8_t reg_address, uint8_t 
     return ret;
 }
 
-static esp_err_t mpu6050_init(i2c_port_t i2c_num)
+esp_err_t mpu6050_init(i2c_port_t i2c_num)
 {
     uint8_t cmd_data;
     vTaskDelay(100 / portTICK_RATE_MS);
