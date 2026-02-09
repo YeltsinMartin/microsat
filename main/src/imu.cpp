@@ -12,11 +12,11 @@
 #include <cstring>
 
 static const char *TAG = "IMU";
-#define I2C_EXAMPLE_MASTER_SCL_IO           2                /*!< gpio number for I2C master clock */
-#define I2C_EXAMPLE_MASTER_SDA_IO           14               /*!< gpio number for I2C master data  */
-#define I2C_EXAMPLE_MASTER_NUM              I2C_NUM_0        /*!< I2C port number for master dev */
-#define I2C_EXAMPLE_MASTER_TX_BUF_DISABLE   0                /*!< I2C master do not need buffer */
-#define I2C_EXAMPLE_MASTER_RX_BUF_DISABLE   0                /*!< I2C master do not need buffer */
+#define I2C_SCL_IO           2                /*!< gpio number for I2C master clock */
+#define I2C_SDA_IO           14               /*!< gpio number for I2C master data  */
+#define I2C_NUM              I2C_NUM_0        /*!< I2C port number for master dev */
+#define I2C_TX_BUF_DISABLE   0                /*!< I2C master do not need buffer */
+#define I2C_RX_BUF_DISABLE   0                /*!< I2C master do not need buffer */
 
 #define MPU6050_SENSOR_ADDR                 0x68             /*!< slave address for MPU6050 sensor */
 #define MPU6050_CMD_START                   0x41             /*!< Command to set measure mode */
@@ -53,14 +53,14 @@ static const char *TAG = "IMU";
 #define WHO_AM_I        0x75  /*!< Command to read WHO_AM_I reg */
 
 
-static esp_err_t i2c_example_master_init()
+static esp_err_t i2c_init()
 {
-    i2c_port_t i2c_master_port = I2C_EXAMPLE_MASTER_NUM;
+    i2c_port_t i2c_master_port = I2C_NUM;
     i2c_config_t conf;
     conf.mode = I2C_MODE_MASTER;
-    conf.sda_io_num = (gpio_num_t)I2C_EXAMPLE_MASTER_SDA_IO;
+    conf.sda_io_num = (gpio_num_t)I2C_SDA_IO;
     conf.sda_pullup_en = (gpio_pullup_t)1;
-    conf.scl_io_num = (gpio_num_t)I2C_EXAMPLE_MASTER_SCL_IO;
+    conf.scl_io_num = (gpio_num_t)I2C_SCL_IO;
     conf.scl_pullup_en = (gpio_pullup_t)1;
     conf.clk_stretch_tick = 300; // 300 ticks, Clock stretch is about 210us, you can make changes according to the actual situation.
     ESP_ERROR_CHECK(i2c_driver_install(i2c_master_port, conf.mode));
@@ -68,7 +68,7 @@ static esp_err_t i2c_example_master_init()
     return ESP_OK;
 }
 
-static esp_err_t i2c_example_master_mpu6050_read(i2c_port_t i2c_num, uint8_t reg_address, uint8_t *data, size_t data_len)
+static esp_err_t mpu6050_read(i2c_port_t i2c_num, uint8_t reg_address, uint8_t *data, size_t data_len)
 {
     int ret;
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
@@ -94,7 +94,7 @@ static esp_err_t i2c_example_master_mpu6050_read(i2c_port_t i2c_num, uint8_t reg
     return ret;
 }
 
-static esp_err_t i2c_example_master_mpu6050_write(i2c_port_t i2c_num, uint8_t reg_address, uint8_t *data, size_t data_len)
+static esp_err_t mpu6050_write(i2c_port_t i2c_num, uint8_t reg_address, uint8_t *data, size_t data_len)
 {
     int ret;
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
@@ -109,13 +109,12 @@ static esp_err_t i2c_example_master_mpu6050_write(i2c_port_t i2c_num, uint8_t re
     return ret;
 }
 
-static esp_err_t i2c_example_master_mpu6050_init(i2c_port_t i2c_num)
+static esp_err_t mpu6050_init(i2c_port_t i2c_num)
 {
     uint8_t cmd_data;
     vTaskDelay(100 / portTICK_RATE_MS);
-    esp_err_t ret =  i2c_example_master_init();
-    printf("Error code : %d\n", ret);
-
+    esp_err_t ret =  i2c_init();
+    ESP_LOGI(TAG, "Init Status %d",ret);
     ESP_LOGI(TAG, "Scanning I2C bus...");
 
     int found = 0;
@@ -150,23 +149,23 @@ static esp_err_t i2c_example_master_mpu6050_init(i2c_port_t i2c_num)
 
 
     cmd_data = 0x00;    // reset mpu6050
-    ESP_ERROR_CHECK(i2c_example_master_mpu6050_write(i2c_num, PWR_MGMT_1, &cmd_data, 1));
+    ESP_ERROR_CHECK(mpu6050_write(i2c_num, PWR_MGMT_1, &cmd_data, 1));
     cmd_data = 0x07;    // Set the SMPRT_DIV
-    ESP_ERROR_CHECK(i2c_example_master_mpu6050_write(i2c_num, SMPLRT_DIV, &cmd_data, 1));
+    ESP_ERROR_CHECK(mpu6050_write(i2c_num, SMPLRT_DIV, &cmd_data, 1));
     cmd_data = 0x06;    // Set the Low Pass Filter
-    ESP_ERROR_CHECK(i2c_example_master_mpu6050_write(i2c_num, CONFIG, &cmd_data, 1));
+    ESP_ERROR_CHECK(mpu6050_write(i2c_num, CONFIG, &cmd_data, 1));
     cmd_data = 0x18;    // Set the GYRO range
-    ESP_ERROR_CHECK(i2c_example_master_mpu6050_write(i2c_num, GYRO_CONFIG, &cmd_data, 1));
+    ESP_ERROR_CHECK(mpu6050_write(i2c_num, GYRO_CONFIG, &cmd_data, 1));
     cmd_data = 0x01;    // Set the ACCEL range
-    ESP_ERROR_CHECK(i2c_example_master_mpu6050_write(i2c_num, ACCEL_CONFIG, &cmd_data, 1));
+    ESP_ERROR_CHECK(mpu6050_write(i2c_num, ACCEL_CONFIG, &cmd_data, 1));
     return ESP_OK;
 }
 
 void IMU::init()
 {
-    i2c_example_master_mpu6050_init(I2C_EXAMPLE_MASTER_NUM);
+    mpu6050_init(I2C_NUM);
 
-    //i2c_driver_delete(I2C_EXAMPLE_MASTER_NUM);
+    //i2c_driver_delete(i2c_NUM);
 
 	// This need to be setup individually
 	//mpu->setXGyroOffset(220);
@@ -182,14 +181,14 @@ void IMU::step(float dt)
     int ret;
     int error_count = 0;
     uint8_t sensor_data[14];
-    i2c_example_master_mpu6050_read(I2C_EXAMPLE_MASTER_NUM, WHO_AM_I, &who_am_i, 1);
+    mpu6050_read(I2C_NUM, WHO_AM_I, &who_am_i, 1);
 
     if (0x68 != who_am_i) {
         error_count++;
     }
 
     memset(sensor_data, 0, 14);
-    ret = i2c_example_master_mpu6050_read(I2C_EXAMPLE_MASTER_NUM, ACCEL_XOUT_H, sensor_data, 14);
+    ret = mpu6050_read(I2C_NUM, ACCEL_XOUT_H, sensor_data, 14);
 
     if (ret == ESP_OK) 
     {
@@ -230,6 +229,9 @@ void IMU::step(float dt)
     {
         ESP_LOGE(TAG, "No ack, sensor not connected...skip...\n");
     }
+
+    //printf("GY:%d.%03d  ", (int)data.gy, abs((int)(data.gy * 1000) % 1000));
+
     /*printf("GY:%d.%03d ",
         (int)data.gy,
         abs((int)(data.gy * 1000) % 1000));*/
