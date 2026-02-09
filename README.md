@@ -179,10 +179,3 @@ A small attitude deadband (default ≈ **0.5°**) prevents constant micro-correc
 └── README.md
 ```
 
----
-
-## Final Note
-
-This codebase is intentionally **boring, explicit, and conservative**.
-
-That is exactly what good flight software looks like.
