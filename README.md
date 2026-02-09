@@ -7,7 +7,7 @@ This repository contains a **flight-software–inspired prototype** implementing
 - **ESP8266** running **FreeRTOS** (ESP8266_RTOS_SDK)
 - **IMU (MPU6050)** for angular rate sensing
 - **Reaction wheel / brushless motor** driven via **ESC + PWM**
-- A **PD attitude controller with deadband**
+- A **D attitude controller with deadband**
 - A **modular, cFS-like software architecture**
 
 The goal of this project is **architectural clarity and correctness**, not performance optimization or production readiness.
@@ -84,10 +84,9 @@ The design intentionally mirrors **spacecraft flight software patterns**:
 ### 2. AOCSMgr (`aocs_mgr.*`)
 
 **Responsibilities**
-- Implements single-axis **PD attitude controller**
-- Tracks a reference attitude `θ_ref`
-- Uses integrated gyro data for attitude estimation
-- Applies a small deadband to avoid limit cycles
+- Implements single-axis **D attitude controller**
+- dampens the oscillation with gyro rate input `θ_dot`
+- Applies a small deadband to avoid drifts and noises
 - Outputs wheel speed commands
 
 ---
@@ -119,7 +118,7 @@ Queues use **latest-value semantics** (`xQueueOverwrite`).
 
 ### Controller Type
 
-**Single-Axis PD Attitude Controller with Deadband**
+**Single-Axis D Rate damping Controller with Deadband**
 
 ---
 
