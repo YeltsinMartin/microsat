@@ -40,25 +40,33 @@ The design intentionally mirrors **spacecraft flight software patterns**:
 ## High-Level Architecture
 
 ```
-+--------------------+
-|    FreeRTOS        |
-|  (Scheduler only)  |
-+--------------------+
-        |
-        v
-+--------------------+        +--------------------+
-|      IO_MGR        | <--->  |    Software Bus   |
-|  (IMU + Actuator)  |        | (FreeRTOS Queues) |
-+--------------------+        +--------------------+  
-                                |                    \
-                                v                      \  
-                    +--------------------+      +--------------------+
-                    |    HealthMgr       |      |     AOCSMgr        |
-                    |  (Monitoring only) |      |  (PD Controller)  |
-                    +--------------------+      +--------------------+
-```
+                    +----------------------+
+                    |       FreeRTOS       |
+                    |      Scheduler       |
+                    +----------+-----------+
+                               |
+        -------------------------------------------------
+        |                    |                         |
+        v                    v                         v
++---------------+    +---------------+         +---------------+
+|    IO_MGR     |    |   HealthMgr   |         |    AOCSMgr    |
+|               |    |               |         |               |
+| - IMU driver  |    | Fault monitor |         | Attitude ctrl |
+| - ESC output  |    | Limits check  |         | Wheel command |
++-------+-------+    +-------+-------+         +-------+-------+
+        ^                    ^                         ^
+        |                    |                         |
+        v                    |                         v  
+                 +-----------------------------------+
+                 |           Software Bus            |
+                 |         (FreeRTOS Queues)         |
+                 |                                   |
+                 |  IMU data   → subscribers         |
+                 |  Motor cmd  → IO manager          |
+                 +-----------------------------------+
 
----
+
+```
 
 ## Modules
 
