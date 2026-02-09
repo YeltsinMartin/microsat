@@ -46,16 +46,16 @@ The design intentionally mirrors **spacecraft flight software patterns**:
 +--------------------+
         |
         v
-+--------------------+      +--------------------+
-|      IO_MGR        | ---> |     Software Bus   |
-|  (IMU + Actuator)  |      | (FreeRTOS Queues) |
-+--------------------+      +--------------------+
-        ^                             |
-        |                             v
-+--------------------+      +--------------------+
-|    HealthMgr       |      |     AOCSMgr        |
-|  (Monitoring only) | <--- |  (PD Controller)  |
-+--------------------+      +--------------------+
++--------------------+        +--------------------+
+|      IO_MGR        | <--->  |    Software Bus   |
+|  (IMU + Actuator)  |        | (FreeRTOS Queues) |
++--------------------+        +--------------------+  
+                                |                    \
+                                v                      \  
+                    +--------------------+      +--------------------+
+                    |    HealthMgr       |      |     AOCSMgr        |
+                    |  (Monitoring only) |      |  (PD Controller)  |
+                    +--------------------+      +--------------------+
 ```
 
 ---
