@@ -115,22 +115,6 @@ Queues use **latest-value semantics** (`xQueueOverwrite`).
 ---
 
 ## Control Law
-
-### Controller Type
-
-**Single-Axis D Rate damping Controller with Deadband**
-
----
-
-### Attitude Estimation
-
-\[
-\theta_{est}(k+1) = \theta_{est}(k) + \omega \cdot \Delta t
-\]
-
----
-
-### Control Law
 <img width="986" height="694" alt="image" src="https://github.com/YeltsinMartin/microsat/blob/main/controller.png" />
 
 ---
